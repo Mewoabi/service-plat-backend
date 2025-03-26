@@ -1,0 +1,98 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  role         String // freelancer, client, admin
+  email        String     @unique
+  passwordHash String
+  profile      Profile?
+  jobsPosted   Job[]
+  proposals    Proposal[]
+  contracts    Contract[]
+  reviews      Review[]
+  createdAt    DateTime   @default(now())
+  lastLogin    DateTime?
+}
+
+model Profile {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  user               User     @relation(fields: [userId], references: [id])
+  userId             String   @unique @db.ObjectId
+  bio                String?
+  mobileMoneyNumber  String?
+  bankAccountNumber  String?
+  nationalIdUrl      String?
+  verificationStatus String?  @default("pending") // pending, verified, rejected
+  location           String?
+  createdAt          DateTime @default(now())
+}
+
+model Job {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  title         String
+  description   String
+  category      String // tech, creative, service
+  budget        Float
+  status        String     @default("open") // open, in_progress, completed
+  numberOfSlots Int        @default(1) // Total positions available
+  acceptedSlots Int        @default(0) // Filled positions
+  client        User       @relation(fields: [clientId], references: [id])
+  clientId      String     @db.ObjectId
+  proposals     Proposal[]
+  createdAt     DateTime   @default(now())
+}
+
+model Proposal {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  freelancer   User      @relation(fields: [freelancerId], references: [id])
+  freelancerId String    @db.ObjectId
+  job          Job       @relation(fields: [jobId], references: [id])
+  jobId        String    @db.ObjectId
+  coverLetter  String
+  bidAmount    Float
+  status       String    @default("pending") // pending, accepted, rejected
+  createdAt    DateTime  @default(now())
+  contract     Contract?
+}
+
+model Contract {
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  proposal     Proposal  @relation(fields: [proposalId], references: [id])
+  proposalId   String    @unique @db.ObjectId
+  escrowAmount Float
+  status       String    @default("active") // active, completed, disputed
+  payments     Payment[]
+  reviews      Review[]
+  createdAt    DateTime  @default(now())
+  User         User?     @relation(fields: [userId], references: [id])
+  userId       String?   @db.ObjectId
+}
+
+model Payment {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  contract      Contract @relation(fields: [contractId], references: [id])
+  contractId    String   @db.ObjectId
+  amount        Float
+  paymentMethod String // mobile_money, bank_transfer
+  transactionId String
+  status        String   @default("pending") // pending, completed, failed
+  createdAt     DateTime @default(now())
+}
+
+model Review {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  contract   Contract @relation(fields: [contractId], references: [id])
+  contractId String   @db.ObjectId
+  reviewer   User     @relation(fields: [reviewerId], references: [id])
+  reviewerId String   @db.ObjectId
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+}
