@@ -1,13 +1,14 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PrismaService
   extends PrismaClient
   implements OnModuleInit, OnModuleDestroy {
-  constructor() {
+  constructor(private readonly config: ConfigService) {
     super({
-      log: ['query', 'error', 'warn'],
+      log: config.get('LOG_LEVELS') || ['query', 'error', 'warn'],
     });
   }
 

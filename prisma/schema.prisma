@@ -7,9 +7,51 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum UserRole {
+  freelancer
+  client
+  admin
+}
+
+enum VerificationStatus {
+  pending
+  verified
+  rejected
+}
+
+enum ProposalStatus {
+  pending
+  accepted
+  rejected
+}
+
+enum ContractStatus {
+  active
+  completed
+  disputed
+}
+
+enum PaymentStatus {
+  pending
+  completed
+  failed
+}
+
+enum PaymentMethod {
+  mobile_money
+  orange_money
+  other
+}
+
+enum JobStatus {
+  open
+  in_progress
+  completed
+}
+
 model User {
   id           String     @id @default(auto()) @map("_id") @db.ObjectId
-  role         String // freelancer, client, admin
+  role         UserRole   @default(client) // freelancer, client, admin
   email        String     @unique
   passwordHash String
   profile      Profile?
@@ -22,25 +64,24 @@ model User {
 }
 
 model Profile {
-  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
-  user               User     @relation(fields: [userId], references: [id])
-  userId             String   @unique @db.ObjectId
+  id                 String              @id @default(auto()) @map("_id") @db.ObjectId
+  user               User                @relation(fields: [userId], references: [id])
+  userId             String              @unique @db.ObjectId
   bio                String?
   mobileMoneyNumber  String?
   bankAccountNumber  String?
   nationalIdUrl      String?
-  verificationStatus String?  @default("pending") // pending, verified, rejected
+  verificationStatus VerificationStatus? @default(pending)
   location           String?
-  createdAt          DateTime @default(now())
+  createdAt          DateTime            @default(now())
 }
 
 model Job {
   id            String     @id @default(auto()) @map("_id") @db.ObjectId
   title         String
   description   String
-  category      String // tech, creative, service
   budget        Float
-  status        String     @default("open") // open, in_progress, completed
+  status        JobStatus  @default(open) // open, in_progress, completed
   numberOfSlots Int        @default(1) // Total positions available
   acceptedSlots Int        @default(0) // Filled positions
   client        User       @relation(fields: [clientId], references: [id])
@@ -50,40 +91,40 @@ model Job {
 }
 
 model Proposal {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  freelancer   User      @relation(fields: [freelancerId], references: [id])
-  freelancerId String    @db.ObjectId
-  job          Job       @relation(fields: [jobId], references: [id])
-  jobId        String    @db.ObjectId
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  freelancer   User           @relation(fields: [freelancerId], references: [id])
+  freelancerId String         @db.ObjectId
+  job          Job            @relation(fields: [jobId], references: [id])
+  jobId        String         @db.ObjectId
   coverLetter  String
   bidAmount    Float
-  status       String    @default("pending") // pending, accepted, rejected
-  createdAt    DateTime  @default(now())
+  status       ProposalStatus @default(pending) // pending, accepted, rejected
+  createdAt    DateTime       @default(now())
   contract     Contract?
 }
 
 model Contract {
-  id           String    @id @default(auto()) @map("_id") @db.ObjectId
-  proposal     Proposal  @relation(fields: [proposalId], references: [id])
-  proposalId   String    @unique @db.ObjectId
+  id           String         @id @default(auto()) @map("_id") @db.ObjectId
+  proposal     Proposal       @relation(fields: [proposalId], references: [id])
+  proposalId   String         @unique @db.ObjectId
   escrowAmount Float
-  status       String    @default("active") // active, completed, disputed
+  status       ContractStatus @default(active) // active, completed, disputed
   payments     Payment[]
   reviews      Review[]
-  createdAt    DateTime  @default(now())
-  User         User?     @relation(fields: [userId], references: [id])
-  userId       String?   @db.ObjectId
+  createdAt    DateTime       @default(now())
+  User         User?          @relation(fields: [userId], references: [id])
+  userId       String?        @db.ObjectId
 }
 
 model Payment {
-  id            String   @id @default(auto()) @map("_id") @db.ObjectId
-  contract      Contract @relation(fields: [contractId], references: [id])
-  contractId    String   @db.ObjectId
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  contract      Contract      @relation(fields: [contractId], references: [id])
+  contractId    String        @db.ObjectId
   amount        Float
-  paymentMethod String // mobile_money, bank_transfer
+  paymentMethod PaymentMethod @default(mobile_money) // mobile_money, bank_transfer
   transactionId String
-  status        String   @default("pending") // pending, completed, failed
-  createdAt     DateTime @default(now())
+  status        PaymentStatus @default(pending) // pending, completed, failed
+  createdAt     DateTime      @default(now())
 }
 
 model Review {
