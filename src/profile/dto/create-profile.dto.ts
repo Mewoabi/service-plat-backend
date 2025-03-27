@@ -1,6 +1,6 @@
 import { OmitType, PartialType } from "@nestjs/mapped-types";
 import { Prisma } from "@prisma/client";
-import { IsNotEmpty, IsMongoId, IsOptional, IsString, IsUrl } from "class-validator";
+import { IsNotEmpty, IsMongoId, IsOptional, IsString, IsUrl, Matches } from "class-validator";
 
 export class CreateProfileDto implements Prisma.ProfileUncheckedCreateInput {
   @IsString({ message: "User ID must be a string" })
@@ -16,6 +16,7 @@ export class CreateProfileDto implements Prisma.ProfileUncheckedCreateInput {
   @IsOptional()
   @IsString({ message: "Mobile money number must be a string" })
   @IsNotEmpty({ message: "Mobile money number is required" })
+  @Matches(/^(\+?237)?6[9875]\d{7}$/, { message: "Mobile money/Orange money number must be a valid Cameroon phone number format" })
   mobileMoneyNumber?: string;
 
   @IsOptional()
