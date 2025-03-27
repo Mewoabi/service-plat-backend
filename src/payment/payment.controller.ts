@@ -54,7 +54,7 @@ export class PaymentController {
     @Param('id') id: string,
     @Body('status', new ParseEnumPipe(Object.values(PaymentStatus))) status: PaymentStatus
   ) {
-    return this.paymentService.updatePaymentStatus(id, status as PaymentStatus);
+    return this.paymentService.updatePaymentStatus(id, status);
   }
 
   // Fapshi API integration endpoints
@@ -80,6 +80,7 @@ export class PaymentController {
   }
 
   @Post('fapshi/expire-payment')
+  @HttpCode(HttpStatus.OK)
   expirePayment(@Body() expirePaymentDto: ExpirePaymentDto) {
     return this.paymentService.expirePayment(expirePaymentDto);
   }
