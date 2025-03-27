@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { CreateJobDto } from './dto/create-job.dto';
 import { UpdateJobDto } from './dto/update-job.dto';
 import { PrismaService } from '../prisma/prisma.service';
-import { JobStatus } from '@prisma/client';
+import { Prisma, JobStatus } from '@prisma/client';
+import { isMongoId } from 'class-validator';
 
 @Injectable()
 export class JobService {
@@ -21,18 +22,18 @@ export class JobService {
     });
   }
 
-  async findAll(filters?: { category?: string; status?: string; clientId?: string }) {
-    const where: any = {};
-    
-    if (filters?.category) {
-      where.category = filters.category;
-    }
+  async findAll(filters?: { status?: string; clientId?: string }) {
+    const where: Prisma.JobWhereInput = {};
     
     if (filters?.status) {
-      where.status = filters.status;
+      where.status = filters.status as JobStatus;
     }
     
     if (filters?.clientId) {
+      // validate client id
+      if (!isMongoId(filters.clientId)) {
+        throw new BadRequestException('Invalid client ID');
+      }
       where.clientId = filters.clientId;
     }
     
@@ -60,6 +61,12 @@ export class JobService {
   }
 
   async findOne(id: string) {
+
+    // validate job id
+    if (!isMongoId(id)) {
+      throw new BadRequestException('Invalid job ID');
+    }
+
     const job = await this.prisma.job.findUnique({
       where: { id },
       include: {
@@ -92,6 +99,10 @@ export class JobService {
   }
 
   async update(id: string, updateJobDto: UpdateJobDto) {
+    // validate job id
+    if (!isMongoId(id)) {
+      throw new BadRequestException('Invalid job ID');
+    }
     // First check if the job exists
     await this.findOne(id);
     
@@ -102,6 +113,10 @@ export class JobService {
   }
 
   async remove(id: string) {
+    // validate job id
+    if (!isMongoId(id)) {
+      throw new BadRequestException('Invalid job ID');
+    }
     // First check if the job exists
     await this.findOne(id);
     
@@ -115,6 +130,10 @@ export class JobService {
   }
 
   async updateJobStatus(id: string, status: JobStatus) {
+    // validate job id
+    if (!isMongoId(id)) {
+      throw new BadRequestException('Invalid job ID');
+    }
     // First check if the job exists
     await this.findOne(id);
     
@@ -125,6 +144,10 @@ export class JobService {
   }
 
   async incrementAcceptedSlots(id: string) {
+    // validate job id
+    if (!isMongoId(id)) {
+      throw new BadRequestException('Invalid job ID');
+    }
     const job = await this.findOne(id);
     
     if (job.acceptedSlots >= job.numberOfSlots) {

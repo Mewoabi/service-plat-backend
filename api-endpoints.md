@@ -10,6 +10,7 @@ This document provides a comprehensive list of all API endpoints available in th
 - [Contract Endpoints](#contract-endpoints)
 - [Payment Endpoints](#payment-endpoints)
 - [Review Endpoints](#review-endpoints)
+- [Data Types](#data-types)
 
 ## User Endpoints
 
@@ -27,9 +28,9 @@ This document provides a comprehensive list of all API endpoints available in th
 |--------|----------|-------------|--------------|----------|
 | POST | `/profiles` | Create a profile | `{ userId: string, bio?: string, mobileMoneyNumber?: string, bankAccountNumber?: string, nationalIdUrl?: string, location?: string }` | Profile object |
 | GET | `/profiles` | Get all profiles | - | Array of profiles |
-| GET | `/profiles/:id` | Get a specific profile | - | Profile object |
-| PATCH | `/profiles/:id` | Update a profile | `{ bio?: string, mobileMoneyNumber?: string, bankAccountNumber?: string, nationalIdUrl?: string, location?: string }` | Updated profile |
-| DELETE | `/profiles/:id` | Delete a profile | - | - |
+| GET | `/profiles/users/:id` | Get a specific profile by user ID | - | Profile object |
+| PATCH | `/profiles/users/:id` | Update a profile by user ID | `{ bio?: string, mobileMoneyNumber?: string, bankAccountNumber?: string, nationalIdUrl?: string, location?: string }` | Updated profile |
+| DELETE | `/profiles/users/:id` | Delete a profile by user ID | - | - |
 
 ## Job Endpoints
 

@@ -16,11 +16,10 @@ export class JobController {
 
   @Get()
   findAll(
-    @Query('category') category?: string,
     @Query('status') status?: string,
     @Query('clientId') clientId?: string,
   ) {
-    return this.jobService.findAll({ category, status, clientId });
+    return this.jobService.findAll({ status, clientId });
   }
 
   @Get('client/:clientId')
